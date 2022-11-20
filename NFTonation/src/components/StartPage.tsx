@@ -1,4 +1,4 @@
-import React, {ReactElement, useEffect, useState} from "react";
+import React, {ReactComponentElement, ReactElement, useEffect, useState} from "react";
 import "../styles/StartPage.css"
 import "../styles/MetaMask.css"
 import "../styles/Header.css"
@@ -8,13 +8,14 @@ import metamask from "../images/metamask.png"
 import voting from "../images/voting.png"
 import {BigNumber, Contract, ethers, providers, Signer} from "ethers";
 import {abi} from "./abi";
+// import Timer  from "./Timer"
 import wwf from "../images/wwf.png";
 import unicef from "../images/unicef.png";
 import redcross from "../images/red-cross.png";
 
-export function StartPage(): ReactElement {
+export function StartPage(): ReactComponentElement<any> {
 
-    const contractAddress = "0x9A676e781A523b5d0C0e43731313A708CB607508";
+    const contractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
 
     const ethereum = (window as any).ethereum;
     const [ethAddress, setEthAddress] = useState<string | null>(null);
@@ -119,6 +120,40 @@ export function StartPage(): ReactElement {
             });
     }
 
+    let Timer = () => {
+        const [days, setDays] = useState(0);
+        const [hours, setHours] = useState(0);
+        const [minutes, setMinutes] = useState(0);
+        const [seconds, setSeconds] = useState(0);
+
+        // Todo read this from contract
+        let endtime = contract_ro?.getEndTime();
+        let starttmp = contract_ro?.getStartTime();
+        let deadline = contract_ro?.getEndTime() - contract_ro?.getStartTime(); // December, 31, 2022
+
+        const getTime = (deadline:any) => {
+            const time = Date.parse(deadline) - Date.now();
+
+            setDays(Math.floor(time / (60 * 60 * 24)));
+            setHours(Math.floor((time / (60 * 60)) % 24));
+            setMinutes(Math.floor((time  / 60) % 60));
+            setSeconds(Math.floor(time % 60));
+        }
+
+        useEffect(() => {
+            const interval = setInterval(() => getTime(deadline), 1000);
+
+            return () => clearInterval(interval);
+        }, []);
+
+        return (
+            <div className="countdown">
+                {endtime}
+                {days} : {hours} : {minutes} : {seconds}
+            </div>
+        );
+    };
+
     return (
         <div>
             <div className="start-page" style={{display: !showNextView ? "flex" : "none"}}>
@@ -157,7 +192,7 @@ export function StartPage(): ReactElement {
                         <div className="nft-display"></div>
                     </div>
                     <div id="contract-timer">
-                        <div className="countdown"></div>
+                        <Timer/>
                     </div>
                     <div id="connected-wallet">
                         <div id="wallet-display"><p>

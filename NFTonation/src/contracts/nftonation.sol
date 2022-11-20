@@ -82,8 +82,9 @@ contract NFTonation is IERC721Receiver {
     event VoteSubmitted(string voted);
 
     uint256 startTime;
+    uint256 durationMinutes;
 
-    constructor(address tonation) {
+    constructor(address tonation, uint256 durationMinutes) {
         nft = iTON(tonation);
         ownerAddr = msg.sender;
         addVoter(ownerAddr);
@@ -91,6 +92,7 @@ contract NFTonation is IERC721Receiver {
         addOrg("Unicef", address(0x2));
         addOrg("Red Cross", address(0x3));
         startTime = getBlockTime();
+        durationMinutes = durationMinutes;
     }
 
     function getBlockTime() public view returns (uint256) {
@@ -99,6 +101,14 @@ contract NFTonation is IERC721Receiver {
 
     function requireXMinutesOld(uint256 x) internal view {
         require(getBlockTime() > (startTime + x * 1 minutes), "Vote ongoing");
+    }
+
+    function getEndTime() external view returns (uint256) {
+        return startTime + durationMinutes * 1 minutes;
+    }
+
+    function getStartTime() external view returns(uint256) {
+        return startTime;
     }
 
     function getOrgAddLength() external view returns (uint256) {
